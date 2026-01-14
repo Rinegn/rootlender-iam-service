@@ -1,25 +1,23 @@
-﻿import os
-import httpx
+﻿import httpx
+from app.core.settings import settings
 
-def register_service():
-    registry_url = os.getenv("SERVICE_REGISTRY_URL", "").strip()
-    service_name = os.getenv("SERVICE_NAME", "").strip()
-    port = os.getenv("PORT", "").strip()
-    environment = os.getenv("ENVIRONMENT", "local").strip()
 
-    if not registry_url or not service_name or not port:
+def register_self(base_url: str) -> None:
+    if not settings.service_registry_url:
         return
 
     payload = {
-        "service_name": service_name,
-        "port": int(port),
-        "environment": environment,
-        "health_url": f"http://127.0.0.1:{port}/health"
+        "service_name": settings.service_name,
+        "base_url": base_url,
+        "environment": settings.environment,
     }
 
     try:
-        with httpx.Client(timeout=2.0) as client:
-            client.post(f"{registry_url}/register", json=payload)
+        with httpx.Client(timeout=5.0) as client:
+            client.post(
+                f"{settings.service_registry_url}/register",
+                json=payload,
+            )
     except Exception:
-        # Fail-open: never block startup
+        # Phase 1: do not block startup
         pass
