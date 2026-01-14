@@ -1,14 +1,11 @@
 ﻿from fastapi import FastAPI
 from app.core.settings import settings
 from app.clients.service_registry_client import register_self
-from app.clients.service_discovery_client import ServiceDiscoveryClient
 
 app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
 )
-
-discovery = ServiceDiscoveryClient()
 
 
 @app.on_event("startup")
@@ -31,13 +28,4 @@ def health():
         "service": settings.service_name,
         "environment": settings.environment,
         "status": "ok",
-    }
-
-
-# ---- DEBUG: READ-ONLY SERVICE DISCOVERY ----
-@app.get("/_debug/discover/{service_name}")
-def debug_discover(service_name: str):
-    return {
-        "service": service_name,
-        "base_url": discovery.get_service_url(service_name),
     }
