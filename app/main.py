@@ -29,3 +29,12 @@ def health():
         "environment": settings.environment,
         "status": "ok",
     }
+from app.clients.config_client import ConfigClient
+
+config_client = ConfigClient()
+
+@app.get("/_internal/config-health")
+def internal_config_health():
+    return {
+        "config_service_health": config_client.get_health()
+    }
